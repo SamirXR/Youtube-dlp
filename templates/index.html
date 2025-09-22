@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Downloader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">
+                    <i class="fas fa-play-circle"></i>
+                    YouTube Video Downloader
+                </h1>
+                <p class="subtitle">Download and trim videos with professional quality</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- URL Input Section -->
+            <section class="section url-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-link"></i> Video URL</h2>
+                    <p>Enter the YouTube video URL you want to download</p>
+                </div>
+                <form id="url-form" class="url-form">
+                    <div class="input-group">
+                        <input 
+                            type="url" 
+                            id="video-url" 
+                            class="url-input" 
+                            placeholder="https://www.youtube.com/watch?v=..." 
+                            required
+                        >
+                        <button type="submit" class="btn btn-primary" id="fetch-btn">
+                            <i class="fas fa-search"></i>
+                            Fetch Video Info
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Loading State -->
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Fetching video information...</p>
+            </div>
+
+            <!-- Video Info Section -->
+            <section id="video-info-section" class="section video-info-section hidden">
+                <div class="section-header">
+                    <h2><i class="fas fa-info-circle"></i> Video Information</h2>
+                </div>
+                <div class="video-info-card">
+                    <div class="video-thumbnail">
+                        <img id="video-thumbnail" src="" alt="Video thumbnail">
+                        <div class="duration-badge" id="duration-badge"></div>
+                    </div>
+                    <div class="video-details">
+                        <h3 id="video-title">Video Title</h3>
+                        <p class="video-meta">
+                            <span><i class="fas fa-user"></i> <span id="video-uploader">Uploader</span></span>
+                            <span><i class="fas fa-clock"></i> <span id="video-duration">Duration</span></span>
+                        </p>
+                        <div class="video-stats">
+                            <span class="stat">
+                                <i class="fas fa-eye"></i>
+                                <span id="video-views">Views</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Format Selection Section -->
+            <section id="format-section" class="section format-section hidden">
+                <div class="section-header">
+                    <h2><i class="fas fa-cog"></i> Quality Selection</h2>
+                    <p>Choose your preferred video quality and format</p>
+                </div>
+                <div class="formats-grid" id="formats-grid">
+                    <!-- Format cards will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Video Trimming Section -->
+            <section id="trimming-section" class="section trimming-section hidden">
+                <div class="section-header">
+                    <h2><i class="fas fa-cut"></i> Video Trimming (Optional)</h2>
+                    <p>Trim your video to specific start and end times</p>
+                </div>
+                
+                <div class="trimming-controls">
+                    <div class="trim-toggle">
+                        <label class="switch">
+                            <input type="checkbox" id="enable-trimming">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="switch-label">Enable video trimming</span>
+                    </div>
+
+                    <div id="trim-inputs" class="trim-inputs hidden">
+                        <div class="time-input-group">
+                            <label for="start-time">Start Time (MM:SS)</label>
+                            <input 
+                                type="text" 
+                                id="start-time" 
+                                class="time-input" 
+                                placeholder="0:00"
+                                pattern="[0-9]{1,2}:[0-9]{2}"
+                            >
+                        </div>
+                        <div class="time-input-group">
+                            <label for="end-time">End Time (MM:SS)</label>
+                            <input 
+                                type="text" 
+                                id="end-time" 
+                                class="time-input" 
+                                placeholder="1:30"
+                                pattern="[0-9]{1,2}:[0-9]{2}"
+                            >
+                        </div>
+                        <div class="trim-preview">
+                            <div class="preview-info">
+                                <span id="trim-duration">Clip duration: --</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Download Section -->
+            <section id="download-section" class="section download-section hidden">
+                <div class="section-header">
+                    <h2><i class="fas fa-download"></i> Download</h2>
+                </div>
+                <div class="download-controls">
+                    <button id="download-btn" class="btn btn-success btn-large">
+                        <i class="fas fa-download"></i>
+                        Start Download
+                    </button>
+                </div>
+                
+                <!-- Download Progress -->
+                <div id="download-progress" class="download-progress hidden">
+                    <div class="progress-info">
+                        <span id="progress-text">Preparing download...</span>
+                        <span id="progress-percentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Download Result -->
+                <div id="download-result" class="download-result hidden">
+                    <div class="result-success">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Download Complete!</h3>
+                        <p id="result-message">Your video has been downloaded successfully.</p>
+                        <button id="download-another" class="btn btn-outline">
+                            <i class="fas fa-plus"></i>
+                            Download Another Video
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 YouTube Video Downloader. Built with ❤️ for video enthusiasts.</p>
+        </footer>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
+                <button class="modal-close" id="close-error-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="error-message">An error occurred</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="error-ok-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
